@@ -1,5 +1,4 @@
 let sqlite3 = require('sqlite3').verbose();
-let db = new sqlite3.Database('./db/pokedex.db');
 var async = require('async');
 var _ = require('lodash');
 
@@ -13,6 +12,8 @@ let knex = require('knex')({
 var express = require('express');
 var router = express.Router();
 
+var queries = require('../db/queries.json');
+
 /* GET a list of all pokemon */
 router.get('/', function(req, res) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -21,43 +22,32 @@ router.get('/', function(req, res) {
   console.log('Received /pokemon request');
 
   var pokemons;
-  var pokemon_types;
+  var pokemonTypes;
   var typedPokemons = [];
 
   async.series(
     [
-      function get_pokemon(callback) {
-        knex.join('pokemon_species_names', 'pokemon_species_names.pokemon_species_id', 'pokemon_species.id')
-            .select('pokemon_species.id', 'pokemon_species_names.name')
-            .from('pokemon_species')
-            .where('pokemon_species_names.local_language_id', 9)
+      function getPokemons(callback) {
+        knex.raw(queries.get.pokemon, [9])
             .then( function (rawPokemons) {
-              return rawPokemons;
-            }).then( function (rawPokemons) {
               pokemons = rawPokemons;
               callback();
             });
       },
       function get_types(callback) {
         async.eachSeries(pokemons, function(untyped_pokemon, outerCallback2) {
-          console.log('Typing pokemon: ' + untyped_pokemon.id);
           async.series([
             function(callback2) {
-              knex.select('pokemon_types.type_id', 'pokemon_types.slot')
-                  .from('pokemon_types')
-                  .where('pokemon_types.pokemon_id', untyped_pokemon.id)
+              knex.raw(queries.pokemon.getTypes, [untyped_pokemon.id])
                   .then( function (types) {
-                    return types;
-                  })
-                  .then( function (types) {
-                    pokemon_types = types;
+                    pokemonTypes = types;
                     callback2();
-                  })
+                  });
             },
             function add_types_to_pokemon(callback2) {
-              var typed_pokemon = untyped_pokemon;
-              typed_pokemon.types = pokemon_types;
-              typedPokemons.push(typed_pokemon);
+              var typedPokemon = untyped_pokemon;
+              typedPokemon.types = pokemonTypes;
+              typedPokemons.push(typedPokemon);
               callback2();
             }
           ], function (err) {
@@ -70,6 +60,48 @@ router.get('/', function(req, res) {
       function returnData(callback) {
         console.log('Returned /pokemon response');
         res.json(typedPokemons);
+        callback();
+      }
+    ]
+  );
+});
+
+router.get('/:id', function(req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+  console.log('Received /pokemon/' + req.params.id + ' request');
+
+  var pokemon = {
+    id: req.params.id
+  };
+
+  async.series(
+    [
+      function getPokemon(callback) {
+        knex.raw(queries.pokemon.get, [pokemon.id, 9])
+            .then( function (rawPokemon) {
+              pokemon = rawPokemon[0];
+              callback();
+            });
+      },
+      function addTypes(callback) {
+        knex.raw(queries.pokemon.getTypes, [pokemon.id])
+            .then( function (types) {
+              pokemon.types = types;
+              callback();
+            });
+      },
+      function addAbilities(callback) {
+        knex.raw(queries.pokemon.getAbilities, [pokemon.id])
+            .then( function (abilities) {
+              pokemon.abilities = abilities;
+              callback();
+            });
+      },
+      function returnPokemon(callback) {
+        console.log('Returned /pokemon/' + req.params.id + ' response');
+        res.json(pokemon);
         callback();
       }
     ]

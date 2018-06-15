@@ -1,0 +1,16 @@
+{
+  "ability": {
+    "getPokemon": "select pokemon.species_id from pokemon_abilities join pokemon on pokemon_abilities.pokemon_id=pokemon.id where pokemon_abilities.ability_id = ? order by pokemon.species_id asc"
+  },
+  "pokemon": {
+    "get": "select pokemon_species.id, pokemon_species_names.name, pokemon.height, pokemon.weight, pokemon.base_experience, pokemon.'order', pokemon.is_default, pokemon_species.gender_rate, pokemon_species_names.genus from pokemon_species join pokemon_species_names on pokemon_species.id = pokemon_species_names.pokemon_species_id join pokemon on pokemon_species.id = pokemon.species_id where pokemon_species.id = ? and pokemon_species_names.local_language_id = ?",
+    "getAbilities": "select pokemon_abilities.ability_id,pokemon_abilities.slot,pokemon_abilities.is_hidden from pokemon_abilities where pokemon_abilities.pokemon_id = ? order by pokemon_abilities.slot asc",
+    "getEggGroups": "select pokemon_egg_groups.egg_group_id from pokemon_egg_groups where pokemon_egg_groups.species_id = ?",
+    "getLocations": "select distinct location_areas.location_id from encounters join location_areas on location_areas.id=encounters.location_area_id where encounters.pokemon_id = ?",
+    "getMoves": "select pokemon_moves.move_id, pokemon_moves.pokemon_move_method_id, pokemon_moves.level, machines.machine_number from pokemon_moves left outer join (select * from machines where machines.version_group_id = ?) as machines on pokemon_moves.move_id = machines.move_id where pokemon_moves.pokemon_id = ? and pokemon_moves.version_group_id = ? order BY pokemon_moves.pokemon_move_method_id asc, pokemon_moves.level asc, machines.machine_number asc",
+    "getTypes": "select pokemon_types.type_id, pokemon_types.slot from pokemon_types where pokemon_types.pokemon_id = ?"
+  },
+  "get": {
+    "pokemon": "select pokemon_species.id, pokemon_species_names.name from pokemon_species join pokemon_species_names on pokemon_species_names.pokemon_species_id = pokemon_species.id where pokemon_species_names.local_language_id = ?"
+  }
+}

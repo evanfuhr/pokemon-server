@@ -24,11 +24,12 @@ router.get('/', function(req, res) {
   var pokemons;
   var pokemonTypes;
   var typedPokemons = [];
+  var local_language_id = 9; // English
 
   async.series(
     [
       function getPokemons(callback) {
-        knex.raw(queries.get.pokemon, [9])
+        knex.raw(queries.get.pokemon, [local_language_id])
             .then( function (rawPokemons) {
               pokemons = rawPokemons;
               callback();
@@ -38,7 +39,7 @@ router.get('/', function(req, res) {
         async.eachSeries(pokemons, function(untyped_pokemon, outerCallback2) {
           async.series([
             function(callback2) {
-              knex.raw(queries.pokemon.getTypes, [untyped_pokemon.id])
+              knex.raw(queries.pokemon.getTypes, [untyped_pokemon.id, local_language_id])
                   .then( function (types) {
                     pokemonTypes = types;
                     callback2();
@@ -75,27 +76,50 @@ router.get('/:id', function(req, res) {
   var pokemon = {
     id: req.params.id
   };
+  var local_language_id = 9; // English
+  var version_group_id = 18; // USUM
 
   async.series(
     [
       function getPokemon(callback) {
-        knex.raw(queries.pokemon.get, [pokemon.id, 9])
+        knex.raw(queries.pokemon.get, [pokemon.id, local_language_id])
             .then( function (rawPokemon) {
               pokemon = rawPokemon[0];
               callback();
             });
       },
       function addTypes(callback) {
-        knex.raw(queries.pokemon.getTypes, [pokemon.id])
+        knex.raw(queries.pokemon.getTypes, [pokemon.id, local_language_id])
             .then( function (types) {
               pokemon.types = types;
               callback();
             });
       },
       function addAbilities(callback) {
-        knex.raw(queries.pokemon.getAbilities, [pokemon.id])
+        knex.raw(queries.pokemon.getAbilities, [pokemon.id, local_language_id])
             .then( function (abilities) {
               pokemon.abilities = abilities;
+              callback();
+            });
+      },
+      function addMoves(callback) {
+        knex.raw(queries.pokemon.getMoves, [version_group_id, pokemon.id, version_group_id, local_language_id])
+            .then( function (moves) {
+              pokemon.moves = moves;
+              callback();
+            });
+      },
+      function addEggGroups(callback) {
+        knex.raw(queries.pokemon.getEggGroups, [pokemon.id, local_language_id])
+            .then( function (eggGroups) {
+              pokemon.eggGroups = eggGroups;
+              callback();
+            });
+      },
+      function addLocations(callback) {
+        knex.raw(queries.pokemon.getLocations, [pokemon.id])
+            .then( function (locations) {
+              pokemon.locations = locations;
               callback();
             });
       },

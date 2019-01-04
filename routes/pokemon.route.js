@@ -156,7 +156,7 @@ router.get('/:id', function(req, res) {
             });
       },
       function addEvolutions(callback) {
-        knex.raw(queries.pokemon.getEvolutions, [pokemon.id])
+        knex.raw(queries.pokemon.getEvolutions, [pokemon.id, local_language_id, local_language_id])
             .then( function (evolutions) {
               pokemon.evolutions = evolutions;
               callback();

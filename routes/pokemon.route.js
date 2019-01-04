@@ -76,6 +76,7 @@ router.get('/:id', function(req, res) {
   var pokemon = {
     id: req.params.id
   };
+  var dualTypeMatchUps = [];
   var local_language_id = 9; // English
   var version_group_id = 18; // USUM
 
@@ -95,10 +96,69 @@ router.get('/:id', function(req, res) {
               callback();
             });
       },
+      function addTypeMatchUps(callback) {
+        if (pokemon.types.length === 1) {
+          knex.raw(queries.pokemon.getSingleTypeMatchUps, [pokemon.types[0].id])
+            .then( function (matchUps) {
+              pokemon.matchUps = matchUps;
+              callback();
+            });
+        } else {
+          knex.raw(queries.pokemon.getDualTypeMatchUps, [pokemon.types[0].id, pokemon.types[1].id])
+            .then( function (matchUps) {
+              for (i = 0; i < matchUps.length; i++) {
+                var matchUp = {
+                  damage_type_id: matchUps[i].damage_type_id
+                };
+                if (matchUps[i].dual_type === 2) {
+                  switch (matchUps[i].damage_factor) {
+                    case 0:
+                      matchUp.damage_factor = 0;
+                      dualTypeMatchUps.push(matchUp);
+                      break;
+                    case 50:
+                      matchUp.damage_factor = 0;
+                      dualTypeMatchUps.push(matchUp);
+                      break;
+                    case 200:
+                      matchUp.damage_factor = 0;
+                      dualTypeMatchUps.push(matchUp);
+                      break;
+                    case 100:
+                      matchUp.damage_factor = 25;
+                      dualTypeMatchUps.push(matchUp);
+                      break;
+                    case 250:
+                      break;
+                    case 400:
+                      matchUp.damage_factor = 400;
+                      dualTypeMatchUps.push(matchUp);
+                      break;
+                    default:
+                      break;
+                  }
+                } else {
+                  matchUp.damage_factor = matchUps[i].damage_factor;
+                  dualTypeMatchUps.push(matchUp);
+                }
+              }
+              pokemon.matchUps = dualTypeMatchUps;
+              callback();
+            });
+        }
+        
+      },
       function addAbilities(callback) {
         knex.raw(queries.pokemon.getAbilities, [pokemon.id, local_language_id])
             .then( function (abilities) {
               pokemon.abilities = abilities;
+              callback();
+            });
+      },
+      function addEvolutions(callback) {
+        knex.raw(queries.pokemon.getEvolutions, [pokemon.id])
+            .then( function (evolutions) {
+              pokemon.evolutions = evolutions;
               callback();
             });
       },
@@ -117,7 +177,7 @@ router.get('/:id', function(req, res) {
             });
       },
       function addLocations(callback) {
-        knex.raw(queries.pokemon.getLocations, [pokemon.id])
+        knex.raw(queries.pokemon.getLocations, [pokemon.id, local_language_id, local_language_id])
             .then( function (locations) {
               pokemon.locations = locations;
               callback();

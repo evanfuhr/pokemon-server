@@ -21,7 +21,6 @@ router.get('/', function(req, res) {
 
   console.log('Received /type request');
 
-  var types = [];
   var local_language_id = 9; // English
 
   knex.raw(queries.get.types, [local_language_id])

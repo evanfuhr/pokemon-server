@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var pokemonRouter = require('./routes/pokemon.route');
 var typeRouter = require('./routes/type.route');
+var moveRouter = require('./routes/move.route');
 
 var app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/', indexRouter);
 app.use('/api/pokemon', pokemonRouter);
 app.use('/api/type', typeRouter);
+app.use('/api/move', moveRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -14,7 +14,14 @@
     "getDualTypeMatchUps": "select damage_type_id, count(damage_type_id) as dual_type, sum(damage_factor) as damage_factor from type_efficacy where damage_factor != 100 and target_type_id in (?, ?) group by damage_type_id order by damage_factor desc"
   },
   "moves": {
-    
+    "get": "",
+    "getPokemon": "select distinct pokemon.species_id, pokemon_species_names.name from pokemon_moves join pokemon on pokemon_moves.pokemon_id = pokemon.id join pokemon_species_names on pokemon.species_id = pokemon_species_names.pokemon_species_id where pokemon_moves.move_id = ? and pokemon_moves.version_group_id = ? and pokemon_species_names.local_language_id = ? order by pokemon.species_id asc"
+  },
+  "type": {
+    "get": "select type_names.type_id as id,type_names.name from type_names where id = ? and type_names.local_language_id = ?",
+    "getPokemon": "select distinct pokemon.species_id as id, pokemon_species_names.name from pokemon_types join pokemon on pokemon_types.pokemon_id = pokemon.id join pokemon_species_names on pokemon.species_id = pokemon_species_names.pokemon_species_id where pokemon_types.type_id = ? and pokemon_species_names.local_language_id = ? order by pokemon.species_id asc",
+    "getMoves": "select moves.id, move_names.name, moves.type_id from moves join move_names on moves.id = move_names.move_id where moves.type_id = ? and move_names.local_language_id = ? order by moves.id asc",
+    "getTypeMatchUps": "select type_efficacy.damage_type_id, type_names.name as damage_type_name, type_efficacy.target_type_id, target.name as target_type_name, type_efficacy.damage_factor from type_efficacy join type_names on type_efficacy.damage_type_id = type_names.type_id join type_names as target on type_efficacy.target_type_id = target.type_id where type_efficacy.damage_factor != 100 and (type_efficacy.target_type_id = ? or type_efficacy.damage_type_id = ?) and type_names.local_language_id = ? and target.local_language_id = ? order by type_efficacy.damage_factor desc"
   },
   "get": {
     "pokemon": "select pokemon_species.id, pokemon_species_names.name from pokemon_species join pokemon_species_names on pokemon_species_names.pokemon_species_id = pokemon_species.id where pokemon_species_names.local_language_id = ?",

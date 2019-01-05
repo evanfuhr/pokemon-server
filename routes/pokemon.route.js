@@ -35,7 +35,7 @@ router.get('/', function(req, res) {
               callback();
             });
       },
-      function get_types(callback) {
+      function getTypes(callback) {
         async.eachSeries(pokemons, function(untyped_pokemon, outerCallback2) {
           async.series([
             function(callback2) {
@@ -45,7 +45,7 @@ router.get('/', function(req, res) {
                     callback2();
                   });
             },
-            function add_types_to_pokemon(callback2) {
+            function addTypesToPokemon(callback2) {
               var typedPokemon = untyped_pokemon;
               typedPokemon.types = pokemonTypes;
               typedPokemons.push(typedPokemon);

@@ -1,11 +1,11 @@
-FROM ubuntu
+FROM node:8
 
-RUN apt-get update
-RUN apt-get install nano nodejs -y
+WORKDIR /usr/src/app
 
-COPY package.json package.json
+COPY package*.json ./
+
 RUN npm install
 
 COPY . .
-EXPOSE 3000
-CMD ["npm start"]
+EXPOSE 8080
+CMD ["npm", "start"]

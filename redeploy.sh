@@ -12,4 +12,5 @@ fi
 if [ `ls | grep Dockerfile` ]; then
     docker build --tag="$IMAGE" .
 fi
-docker run -dP -p 3000:3000 --name="$CONTAINER" $IMAGE
+
+docker run -dP -p 80:8080 --name="$CONTAINER" $IMAGE

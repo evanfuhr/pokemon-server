@@ -6,7 +6,8 @@ let knex = require('knex')({
   client: 'sqlite3',
   connection: {
     filename: './db/pokedex.db'
-  }
+  },
+  useNullAsDefault: true
 });
 
 var express = require('express');
